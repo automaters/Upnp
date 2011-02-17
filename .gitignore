@@ -1,0 +1,17 @@
+# ignore assemblies
+*.dll
+*.exe
+#ignore debug info
+*.pidb
+*.pdb
+*.mdb
+#ignore project settings
+*.userprefs
+*.usertasks
+#ignore test results
+test-results/
+#ignore Mac OS files
+.DS_Store
+#ignore bin and obj folders
+obj/
+bin/
