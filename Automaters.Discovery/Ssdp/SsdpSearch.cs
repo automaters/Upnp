@@ -14,20 +14,75 @@ namespace Automaters.Discovery.Ssdp
     /// <summary>
     /// Class representing an SSDP Search
     /// </summary>
-    public class SsdpSearch
+    public class SsdpSearch : IDisposable
     {
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SsdpSearch"/> class.
         /// </summary>
-        public SsdpSearch()
+        public SsdpSearch(SsdpServer server = null)
         {
+            if (server == null)
+            {
+                server = new SsdpServer();
+                this.OwnsServer = true;
+            }
+
+            this.Server = server;
             this.HostEndpoint = Protocol.DiscoveryEndpoints.IPv4;
             this.SearchType = Protocol.SsdpAll;
             this.Mx = Protocol.DefaultMx;
         }
 
         #region Public Methods
+
+        /// <summary>
+        /// Finds the first result.
+        /// </summary>
+        /// <param name="destinations">The destinations.</param>
+        /// <returns></returns>
+        public SsdpMessage FindFirst(params IPEndPoint[] destinations)
+        {
+            object syncRoot = new object();
+            SsdpMessage result = null;
+            EventHandler<EventArgs<SsdpMessage>> resultHandler = null;
+            
+            // Create our handler to make all the magic happen
+            resultHandler = (sender, e) =>
+            {
+                lock (syncRoot)
+                {
+                    // If we already got our first result then ignore this
+                    if (result != null)
+                        return;
+
+                    // This is our first result so set our value, remove the handler, and cancel the search
+                    result = e.Value;
+                    this.ResultFound -= resultHandler;
+                    this.CancelSearch();
+                }
+            };
+
+            try
+            {
+                lock (this.SearchLock)
+                {
+                    // Add our handler and start the async search
+                    this.ResultFound += resultHandler;
+                    this.SearchAsync(destinations);
+                }
+
+                // Wait until our search is complete
+                this.WaitForSearch();
+            }
+            finally
+            {
+                // Make sure we remove our handler when we're done
+                this.ResultFound -= resultHandler;
+            }
+
+            return result;
+        }
 
         /// <summary>
         /// Searches the specified destinations.
@@ -85,8 +140,6 @@ namespace Automaters.Discovery.Ssdp
         /// <param name="destinations">The destinations.</param>
         public void SearchAsync(params IPEndPoint[] destinations)
         {
-            this.Server = new SsdpServer();
-
             lock (this.SearchLock)
             {
                 // If we're already searching then this is not allowed so throw an error
@@ -113,7 +166,8 @@ namespace Automaters.Discovery.Ssdp
                 this.Server.JoinMulticastGroupAllInterfaces(dest);
 
             // If we're sending out any searches to the broadcast address then be sure to enable broadcasts
-            this.Server.EnableBroadcast = destinations.Any(ep => ep.Address.Equals(IPAddress.Broadcast));
+            if (!this.Server.EnableBroadcast)
+                this.Server.EnableBroadcast = destinations.Any(ep => ep.Address.Equals(IPAddress.Broadcast));
 
             // Now send out our search data
             foreach (IPEndPoint dest in destinations)
@@ -150,8 +204,10 @@ namespace Automaters.Discovery.Ssdp
 
                 // Cleanup our handler and notify everyone that we're done
                 this.Server.DataReceived -= OnServerDataReceived;
-                this.Server.Close();
-                this.Server = null;
+
+                // If this is our server then go ahead and stop listening
+                if (this.OwnsServer)
+                    this.Server.StopListening();
 
                 this.IsSearching = false;
                 this.OnSearchComplete();
@@ -263,6 +319,10 @@ namespace Automaters.Discovery.Ssdp
 
         protected virtual void OnResultFound(SsdpMessage result)
         {
+            // This is a search so ignore any advertisements we get
+            if (result.IsAdvertisement)
+                return;
+
             var handler = this.ResultFound;
             if (handler != null)
                 handler(this, new EventArgs<SsdpMessage>(result));
@@ -277,6 +337,12 @@ namespace Automaters.Discovery.Ssdp
         protected readonly object SearchLock = new object();
 
         protected IDisposable CurrentSearchTimeout
+        {
+            get;
+            set;
+        }
+
+        protected bool OwnsServer
         {
             get;
             set;
@@ -316,6 +382,17 @@ namespace Automaters.Discovery.Ssdp
         {
             get;
             set;
+        }
+
+        #endregion
+
+        #region IDisposable Interface
+
+        public virtual void Dispose()
+        {
+            // Only close the server if we created it
+            if (this.OwnsServer)
+                this.Server.Close();
         }
 
         #endregion

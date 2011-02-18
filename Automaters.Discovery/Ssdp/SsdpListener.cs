@@ -24,7 +24,10 @@ namespace Automaters.Discovery.Ssdp
         public SsdpListener(SsdpServer server = null)
         {
             if (server == null)
+            {
                 server = new SsdpServer();
+                this.OwnsServer = true;
+            }
 
             this.Server = server;
         }
@@ -151,6 +154,18 @@ namespace Automaters.Discovery.Ssdp
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether [owns server].
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if [owns server]; otherwise, <c>false</c>.
+        /// </value>
+        protected bool OwnsServer
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets a value indicating whether this instance is listening.
         /// </summary>
         /// <value>
@@ -170,9 +185,12 @@ namespace Automaters.Discovery.Ssdp
         /// </summary>
         public void  Dispose()
         {
- 	        this.Server.Close();
+            // Only close the server if we own it
+            if (this.OwnsServer)
+ 	            this.Server.Close();
         }
 
         #endregion
+
     }
 }

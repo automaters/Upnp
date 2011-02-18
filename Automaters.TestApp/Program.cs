@@ -17,20 +17,29 @@ namespace Automaters.TestApp
                 announcer.MaxAge = 3;
                 announcer.Start();
 
-                SsdpSearch search = new SsdpSearch();
+                SsdpClient client = new SsdpClient();
+                SsdpSearch search = client.CreateSearch(true);
                 search.SearchType = "upnp:rootdevice";
 
+                Console.WriteLine("Searching for first result:");
+                SsdpMessage first = search.FindFirst(Protocol.DiscoveryEndpoints.IPv4, Protocol.DiscoveryEndpoints.Broadcast);
+                if (first == null)
+                    Console.WriteLine("No results found from FindFirst.");
+                else
+                    Console.WriteLine("First device found at: {0}", first.Location);
+
                 // Attach our events for async search
-                search.ResultFound += new EventHandler<Automaters.Core.EventArgs<SsdpMessage>>(search_ResultFound);
+                client.SearchResponse += new EventHandler<Automaters.Core.EventArgs<SsdpMessage>>(search_ResultFound);
                 search.SearchComplete += new EventHandler(search_SearchComplete);
 
+                Console.WriteLine();
                 Console.WriteLine("Performing asynchronous search:");
                 //search.SearchAsync();
                 search.SearchAsync(Protocol.DiscoveryEndpoints.IPv4, Protocol.DiscoveryEndpoints.Broadcast);
 
                 // Wait for our async search to complete before doing the synchronous search
                 search.WaitForSearch();
-                search.ResultFound -= search_ResultFound;
+                client.SearchResponse -= search_ResultFound;
                 search.SearchComplete -= search_SearchComplete;
 
                 Console.WriteLine();

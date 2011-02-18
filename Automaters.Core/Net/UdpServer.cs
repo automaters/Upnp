@@ -112,10 +112,10 @@ namespace Automaters.Core.Net
 
                         // Complete our receive by getting the data
                         buffer = this.EndReceive(ar, ref remoteEp);
-                    }
 
-                    // Continue receiving data
-                    this.BeginReceive();
+                        // Continue receiving data
+                        this.BeginReceive();
+                    }
                 }
                 catch (SocketException)
                 {
@@ -138,7 +138,7 @@ namespace Automaters.Core.Net
 
         #region Locking
                 
-        private readonly ReaderWriterLockSlim Lock = new ReaderWriterLockSlim();
+        private readonly ReaderWriterLockSlim Lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
 
         /// <summary>
         /// Gets the write lock.

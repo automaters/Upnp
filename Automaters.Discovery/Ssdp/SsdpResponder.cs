@@ -2,26 +2,34 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Automaters.Core.Timers;
-using System.Net;
 using Automaters.Core.Collections;
+using Automaters.Core;
+using System.Net;
+using Automaters.Core.Timers;
+using Automaters.Core.Net;
+using System.Threading;
+using System.IO;
 
 namespace Automaters.Discovery.Ssdp
 {
-
     /// <summary>
-    /// Class for announcing SSDP messages (Alive/ByeByes)
+    /// Class used to respond to SSDP Searches
     /// </summary>
-    public class SsdpAnnouncer : IDisposable
+    /// <remarks>
+    /// TODO: I think we should come up with a better way to do this.
+    /// If we have one responder per service and each responder has to parse all SSDP messages received
+    /// then that's a lot of unnecessary work. We should come up with a better class structure for this.
+    /// </remarks>
+    public class SsdpResponder : IDisposable
     {
-
+        
         #region Constructors
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SsdpAnnouncer"/> class.
         /// </summary>
         /// <param name="server">The server.</param>
-        public SsdpAnnouncer(SsdpServer server = null)
+        public SsdpResponder(SsdpServer server = null)
         {
             if (server == null)
             {
@@ -53,28 +61,19 @@ namespace Automaters.Discovery.Ssdp
                 if (this.IsRunning)
                     return;
 
-                // Send our initial alive message
-                this.SendAliveMessage();
+                // Start our server
+                this.Server.StartListening();
 
-                // Create a new timeout to send out SSDP alive messages
-                // Also make sure we kick the first one off semi-instantly
-                this.TimeoutToken = Dispatcher.AddRepeating(() =>
-                {
-                    lock (this.SyncRoot)
-                    {
-                        if (!this.IsRunning)
-                            return;
-
-                        this.SendAliveMessage();
-                    }
-                }, TimeSpan.FromSeconds(this.MaxAge));
+                // Remove any previous handlers (in case our server didn't stop by us) and add ours
+                this.Server.DataReceived -= OnDataReceived;
+                this.Server.DataReceived += OnDataReceived;
             }
         }
 
         /// <summary>
-        /// Shutdowns this instance.
+        /// Stops this instance.
         /// </summary>
-        public void Shutdown()
+        public void Stop()
         {
             lock (this.SyncRoot)
             {
@@ -82,28 +81,31 @@ namespace Automaters.Discovery.Ssdp
                 if (!this.IsRunning)
                     return;
 
-                // Kill our timeout token
-                this.TimeoutToken.Dispose();
-                this.TimeoutToken = null;
+                // Remove our handler so we no longer receive search requests
+                this.Server.DataReceived -= OnDataReceived;
 
-                // Now send our bye bye message
-                this.SendByeByeMessage();
+                // Stop listening if we own the server
+                if (this.OwnsServer)
+                    this.Server.StopListening();
             }
         }
 
         /// <summary>
-        /// Sends the alive message.
+        /// Determines whether the specified search message is a match.
         /// </summary>
-        public void SendAliveMessage()
+        /// <param name="msg">The search message.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified search message is a match; otherwise, <c>false</c>.
+        /// </returns>
+        public bool IsMatch(SsdpMessage msg)
         {
-            // TODO: Do we need to make sure we join these multicast groups?
+            if (msg.SearchType == Protocol.SsdpAll)
+                return true;
 
-            foreach (IPEndPoint ep in this.RemoteEndPoints)
-            {
-                byte[] bytes = Encoding.ASCII.GetBytes(Protocol.CreateAliveNotify(Protocol.DiscoveryEndpoints.IPv4,
-                    this.Location, this.NotificationType, this.USN, this.MaxAge, this.UserAgent));
-                this.Server.Send(bytes, bytes.Length, ep);
-            }
+            if (msg.SearchType.StartsWith("uuid:"))
+                return (msg.SearchType == this.USN);
+
+            return (msg.SearchType == this.NotificationType);
         }
 
         #endregion
@@ -111,17 +113,58 @@ namespace Automaters.Discovery.Ssdp
         #region Protected Methods
 
         /// <summary>
+        /// Called when [data received].
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="Automaters.Core.EventArgs&lt;Automaters.Core.Net.NetworkData&gt;"/> instance containing the event data.</param>
+        protected virtual void OnDataReceived(object sender, EventArgs<NetworkData> e)
+        {
+            // Queue this response to be processed
+            ThreadPool.QueueUserWorkItem(data =>
+            {
+                try
+                {
+                    // Parse our message and fire our event
+                    using (var stream = new MemoryStream(e.Value.Buffer, 0, e.Value.Length))
+                    {
+                        this.OnSsdpMessageReceived(new SsdpMessage(HttpMessage.Parse(stream), e.Value.RemoteIPEndpoint));
+                    }
+                }
+                catch (ArgumentException ex)
+                {
+                    System.Diagnostics.Trace.TraceError("Failed to parse SSDP response: {0}", ex.ToString());
+                }
+            });
+        }
+
+        protected virtual void OnSsdpMessageReceived(SsdpMessage msg)
+        {
+            // Ignore any advertisements
+            if (msg.IsAdvertisement)
+                return;
+
+            // Check to see if this matches our data before responding
+            if (!this.IsMatch(msg))
+                return;
+
+            // Set up our dispatcher to send the response
+            Dispatcher.Add(() => this.SendSearchResponse(msg), TimeSpan.FromSeconds(msg.MaxAge));
+        }
+
+        /// <summary>
         /// Sends the bye bye message.
         /// </summary>
-        protected void SendByeByeMessage()
+        protected void SendSearchResponse(SsdpMessage msg)
         {
-            // TODO: Do we need to make sure we join these multicast groups?
-
-            foreach (IPEndPoint ep in this.RemoteEndPoints)
+            lock (this.SyncRoot)
             {
-                byte[] bytes = Encoding.ASCII.GetBytes(Protocol.CreateByeByeNotify(Protocol.DiscoveryEndpoints.IPv4,
-                    this.NotificationType, this.USN));
-                this.Server.Send(bytes, bytes.Length, ep);
+                // If we were stopped then don't bother sending this message
+                if (!this.IsRunning)
+                    return;
+
+                byte[] bytes = Encoding.ASCII.GetBytes(Protocol.CreateAliveResponse(
+                    this.Location, msg.SearchType, this.USN, this.MaxAge, Protocol.DefaultUserAgent)); ;
+                this.Server.Send(bytes, bytes.Length, msg.Source);
             }
         }
 
@@ -131,7 +174,6 @@ namespace Automaters.Discovery.Ssdp
 
         protected readonly object SyncRoot = new object();
         protected static readonly TimeoutDispatcher Dispatcher = new TimeoutDispatcher();
-        protected IDisposable TimeoutToken = null;
 
         /// <summary>
         /// Gets or sets the server.
@@ -165,7 +207,7 @@ namespace Automaters.Discovery.Ssdp
         /// </value>
         public bool IsRunning
         {
-            get { return this.TimeoutToken != null; }
+            get { return this.Server.IsListening; }
         }
 
         /// <summary>
@@ -246,8 +288,6 @@ namespace Automaters.Discovery.Ssdp
         /// </summary>
         public void Dispose()
         {
-            this.Shutdown();
-
             if (this.OwnsServer)
                 this.Server.Close();
         }
@@ -255,5 +295,4 @@ namespace Automaters.Discovery.Ssdp
         #endregion
 
     }
-
 }
