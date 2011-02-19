@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Automaters.Core;
+using System.Net;
 
 namespace Automaters.Discovery.Ssdp
 {
@@ -19,7 +20,7 @@ namespace Automaters.Discovery.Ssdp
         /// </summary>
         public SsdpClient()
         {
-            this.Server = new SsdpServer();
+            this.Server = new SsdpSocket(new IPEndPoint(IPAddress.Any, 1900));
             this.Listener = this.CreateListener();
         }
 
@@ -153,7 +154,7 @@ namespace Automaters.Discovery.Ssdp
         /// <value>
         /// The server.
         /// </value>
-        protected SsdpServer Server
+        protected SsdpSocket Server
         {
             get;
             set;

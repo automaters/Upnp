@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Automaters.Core.Net;
+using Automaters.Core.Extensions;
 using System.Net;
 
 namespace Automaters.Discovery.Ssdp
@@ -37,7 +38,7 @@ namespace Automaters.Discovery.Ssdp
         protected virtual void ParseMessageData()
         {
             // Parse out the type and UDN from the data
-            this.Type = this.Message.Headers["NT"];
+            this.Type = this.Message.Headers.ValueOrDefault("NT", string.Empty);
             this.UDN = this.USN;
             int index = this.UDN.IndexOf("::");
             if (index != -1)
@@ -49,14 +50,14 @@ namespace Automaters.Discovery.Ssdp
             }
 
             // Parse out the max age from the cache control
-            string cacheControl = this.Message.Headers["CACHE-CONTROL"].ToUpper();
+            string cacheControl = this.Message.Headers.ValueOrDefault("CACHE-CONTROL", string.Empty).ToUpper();
             this.MaxAge = 0;
             int temp = 0;
             if (cacheControl.StartsWith("MAX-AGE") && int.TryParse(cacheControl.Substring(8), out temp))
                 this.MaxAge = temp;
 
 
-            string date = this.Message.Headers["DATE"];
+            string date = this.Message.Headers.ValueOrDefault("DATE", string.Empty);
             DateTime tempDt;
             if (string.IsNullOrEmpty(date) || !DateTime.TryParse(date, out tempDt))
                 this.DateGenerated = DateTime.Now;
@@ -100,7 +101,7 @@ namespace Automaters.Discovery.Ssdp
         /// </value>
         public bool IsAlive
         {
-            get { return (this.Message.Headers["NTS"].ToLower() != Protocol.SsdpByeByeNts.ToLower()); }
+            get { return (this.Message.Headers.ValueOrDefault("NTS", string.Empty).ToLower() != Protocol.SsdpByeByeNts.ToLower()); }
         }
 
         /// <summary>
@@ -108,7 +109,7 @@ namespace Automaters.Discovery.Ssdp
         /// </summary>
         public string USN
         {
-            get { return this.Message.Headers["USN"]; }
+            get { return this.Message.Headers.ValueOrDefault("USN", string.Empty); }
         }
 
         /// <summary>
@@ -152,7 +153,7 @@ namespace Automaters.Discovery.Ssdp
         /// </summary>
         public string Location
         {
-            get { return this.Message.Headers["LOCATION"]; }
+            get { return this.Message.Headers.ValueOrDefault("LOCATION", string.Empty); }
         }
 
         /// <summary>
@@ -160,7 +161,7 @@ namespace Automaters.Discovery.Ssdp
         /// </summary>
         public string Server
         {
-            get { return this.Message.Headers["SERVER"]; }
+            get { return this.Message.Headers.ValueOrDefault("SERVER", string.Empty); }
         }
 
         /// <summary>
@@ -171,7 +172,7 @@ namespace Automaters.Discovery.Ssdp
         /// </value>
         public string SearchType
         {
-            get { return this.Message.Headers["ST"]; }
+            get { return this.Message.Headers.ValueOrDefault("ST", string.Empty); }
         }
 
         /// <summary>

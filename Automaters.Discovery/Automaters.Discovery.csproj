@@ -42,12 +42,13 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Ssdp\Protocol.cs" />
+    <Compile Include="Ssdp\SsdpServer.cs" />
     <Compile Include="Ssdp\SsdpAnnouncer.cs" />
     <Compile Include="Ssdp\SsdpClient.cs" />
     <Compile Include="Ssdp\SsdpListener.cs" />
     <Compile Include="Ssdp\SsdpSearch.cs" />
     <Compile Include="Ssdp\SsdpMessage.cs" />
-    <Compile Include="Ssdp\SsdpServer.cs" />
+    <Compile Include="Ssdp\SsdpSocket.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Automaters.Core\Automaters.Core.csproj">

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Collections.Specialized;
 
 namespace Automaters.Core.Extensions
 {
@@ -23,6 +24,18 @@ namespace Automaters.Core.Extensions
         public static TValue ValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value = default(TValue))
         {
             dictionary.TryGetValue(key, out value);
+            return value;
+        }
+
+        public static string ValueOrDefault(this NameValueCollection collection, string key, string value = null)
+        {
+            // Find the current value and if it's either not null or the key exists return it
+            // It's assumed that the indexer is a faster way of finding the key so it's used first
+            string found = collection[key];
+            if (found != null || collection.Keys.Cast<string>().Any(k => k == key))
+                return found;
+
+            // Otherwise return the default value
             return value;
         }
 

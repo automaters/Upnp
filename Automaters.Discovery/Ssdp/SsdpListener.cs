@@ -21,11 +21,11 @@ namespace Automaters.Discovery.Ssdp
         /// Initializes a new instance of the <see cref="SsdpListener"/> class.
         /// </summary>
         /// <param name="server">The server.</param>
-        public SsdpListener(SsdpServer server = null)
+        public SsdpListener(SsdpSocket server = null)
         {
             if (server == null)
             {
-                server = new SsdpServer();
+                server = new SsdpSocket(new IPEndPoint(IPAddress.Any, 1900));
                 this.OwnsServer = true;
             }
 
@@ -147,7 +147,7 @@ namespace Automaters.Discovery.Ssdp
         /// <value>
         /// The server.
         /// </value>
-        protected SsdpServer Server
+        protected SsdpSocket Server
         {
             get;
             set;

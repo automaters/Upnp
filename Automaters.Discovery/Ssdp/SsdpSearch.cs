@@ -20,11 +20,11 @@ namespace Automaters.Discovery.Ssdp
         /// <summary>
         /// Initializes a new instance of the <see cref="SsdpSearch"/> class.
         /// </summary>
-        public SsdpSearch(SsdpServer server = null)
+        public SsdpSearch(SsdpSocket server = null)
         {
             if (server == null)
             {
-                server = new SsdpServer();
+                server = new SsdpSocket();
                 this.OwnsServer = true;
             }
 
@@ -348,7 +348,7 @@ namespace Automaters.Discovery.Ssdp
             set;
         }
 
-        protected SsdpServer Server
+        protected SsdpSocket Server
         {
             get;
             set;
