@@ -17,6 +17,8 @@ namespace Automaters.Discovery.Ssdp
     public class SsdpSearch : IDisposable
     {
 
+        #region Constructors
+
         /// <summary>
         /// Initializes a new instance of the <see cref="SsdpSearch"/> class.
         /// </summary>
@@ -33,6 +35,8 @@ namespace Automaters.Discovery.Ssdp
             this.SearchType = Protocol.SsdpAll;
             this.Mx = Protocol.DefaultMx;
         }
+
+        #endregion
 
         #region Public Methods
 
@@ -286,6 +290,11 @@ namespace Automaters.Discovery.Ssdp
 
         #region Events
 
+        /// <summary>
+        /// Called when [server data received].
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="Automaters.Core.EventArgs&lt;Automaters.Core.Net.NetworkData&gt;"/> instance containing the event data.</param>
         protected virtual void OnServerDataReceived(object sender, EventArgs<NetworkData> e)
         {
             // Queue this response to be processed
@@ -306,8 +315,14 @@ namespace Automaters.Discovery.Ssdp
             });
         }
 
+        /// <summary>
+        /// Occurs when [search complete].
+        /// </summary>
         public event EventHandler SearchComplete;
 
+        /// <summary>
+        /// Called when [search complete].
+        /// </summary>
         protected virtual void OnSearchComplete()
         {
             var handler = this.SearchComplete;
@@ -315,12 +330,28 @@ namespace Automaters.Discovery.Ssdp
                 handler(this, EventArgs.Empty);
         }
 
+        /// <summary>
+        /// Occurs when [result found].
+        /// </summary>
         public event EventHandler<EventArgs<SsdpMessage>> ResultFound;
 
+        /// <summary>
+        /// Called when [result found].
+        /// </summary>
+        /// <param name="result">The result.</param>
         protected virtual void OnResultFound(SsdpMessage result)
         {
             // This is a search so ignore any advertisements we get
             if (result.IsAdvertisement)
+                return;
+
+            // If this is not a notify message then ignore it
+            if (result.Message.IsRequest)
+                return;
+
+            // Check to make sure this message matches our filter
+            var filter = this.Filter;
+            if (!filter(result))
                 return;
 
             var handler = this.ResultFound;
@@ -333,51 +364,110 @@ namespace Automaters.Discovery.Ssdp
         #region Properties
 
         protected static readonly TimeoutDispatcher Dispatcher = new TimeoutDispatcher();
-
         protected readonly object SearchLock = new object();
 
+        /// <summary>
+        /// Gets or sets the current search timeout.
+        /// </summary>
+        /// <value>
+        /// The current search timeout.
+        /// </value>
         protected IDisposable CurrentSearchTimeout
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether [owns server].
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if [owns server]; otherwise, <c>false</c>.
+        /// </value>
         protected bool OwnsServer
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the server.
+        /// </summary>
+        /// <value>
+        /// The server.
+        /// </value>
         protected SsdpSocket Server
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is searching.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this instance is searching; otherwise, <c>false</c>.
+        /// </value>
         public bool IsSearching
         {
             get;
             protected set;
         }
 
+        /// <summary>
+        /// Gets or sets the filter.
+        /// </summary>
+        /// <value>
+        /// The filter.
+        /// </value>
+        public Func<SsdpMessage, bool> Filter
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether [use remote endpoint as host].
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if [use remote endpoint as host]; otherwise, <c>false</c>.
+        /// </value>
         public bool UseRemoteEndpointAsHost
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the host endpoint.
+        /// </summary>
+        /// <value>
+        /// The host endpoint.
+        /// </value>
         public IPEndPoint HostEndpoint
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the type of the search.
+        /// </summary>
+        /// <value>
+        /// The type of the search.
+        /// </value>
         public string SearchType
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the mx.
+        /// </summary>
+        /// <value>
+        /// The mx.
+        /// </value>
         public ushort Mx
         {
             get;
@@ -388,6 +478,9 @@ namespace Automaters.Discovery.Ssdp
 
         #region IDisposable Interface
 
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
         public virtual void Dispose()
         {
             // Only close the server if we created it

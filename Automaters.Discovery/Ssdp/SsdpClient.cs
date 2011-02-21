@@ -34,10 +34,10 @@ namespace Automaters.Discovery.Ssdp
         /// <returns></returns>
         public virtual SsdpSearch CreateSearch(bool requireUniqueLocation)
         {
-            var search = new SsdpSearch(this.Server);
+            var search = new SsdpSearch();
 
             Dictionary<string, SsdpMessage> dict = new Dictionary<string, SsdpMessage>();
-            search.ResultFound += (sender, e) =>
+            search.Filter = (msg) =>
             {
                 lock (dict)
                 {
@@ -45,16 +45,21 @@ namespace Automaters.Discovery.Ssdp
                     // The reason for this is that there is potential for devices to share the same UDN
                     // However, each unique location is definitely a separate result
                     // And there's no potential for two devices to share the same location
-                    string key = (requireUniqueLocation ? e.Value.Location : e.Value.USN);
+                    string key = (requireUniqueLocation ? msg.Location : msg.USN);
                     if (dict.ContainsKey(key))
-                        return;
+                        return false;
 
-                    dict.Add(key, e.Value);
+                    dict.Add(key, msg);
+                    return true;
                 }
+            };
 
+            search.ResultFound += (sender, e) =>
+            {
                 this.OnSsdpMessageReceived(sender, e);
                 this.OnSearchResponse(sender, e);   
             };
+
             return search;
         }
 
