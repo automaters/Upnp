@@ -49,6 +49,15 @@
     <Compile Include="Ssdp\SsdpSearch.cs" />
     <Compile Include="Ssdp\SsdpMessage.cs" />
     <Compile Include="Ssdp\SsdpSocket.cs" />
+    <Compile Include="Upnp\UpnpAction.cs" />
+    <Compile Include="Upnp\UpnpArgument.cs" />
+    <Compile Include="Upnp\UpnpDevice.cs" />
+    <Compile Include="Upnp\UpnpIcon.cs" />
+    <Compile Include="Upnp\UpnpRoot.cs" />
+    <Compile Include="Upnp\UpnpService.cs" />
+    <Compile Include="Upnp\UpnpServiceDescription.cs" />
+    <Compile Include="Upnp\UpnpStateVariable.cs" />
+    <Compile Include="Upnp\UpnpType.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Automaters.Core\Automaters.Core.csproj">

@@ -40,16 +40,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Collections\CustomActionCollection.cs" />
     <Compile Include="Collections\SyncCollection.cs" />
     <Compile Include="Disposable.cs" />
     <Compile Include="EventArgs.cs" />
     <Compile Include="Extensions\Dictionary.cs" />
+    <Compile Include="Extensions\Xml.cs" />
     <Compile Include="Net\HttpMessage.cs" />
     <Compile Include="Net\IPAddressHelpers.cs" />
     <Compile Include="Net\NetworkData.cs" />
     <Compile Include="Net\UdpServer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Timers\TimeoutDispatcher.cs" />
+    <Compile Include="Xml\XmlHelper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
