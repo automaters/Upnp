@@ -78,7 +78,7 @@ namespace Automaters.Discovery.Upnp
                 writer.WriteAttributeString("enabled", "false");
 
             foreach (var pair in this.Properties)
-                writer.WriteAttributeString(pair.Key, pair.Value);
+                writer.WriteElementString(pair.Key, pair.Value);
 
             if (this.Devices.Count > 0)
             {
