@@ -103,6 +103,8 @@ namespace Automaters.Discovery.Upnp
                     icon.WriteXml(writer);
                 writer.WriteEndElement();
             }
+
+            writer.WriteEndElement(); //device
         }
 
         #endregion
