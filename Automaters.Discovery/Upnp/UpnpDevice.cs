@@ -170,6 +170,67 @@ namespace Automaters.Discovery.Upnp
             private set;
         }
 
+        public string FriendlyName
+        {
+            get { return this.GetProperty("friendlyName"); }
+            set { this.Properties["friendlyName"] = value; }
+        }
+
+        public string Manufacturer
+        {
+            get { return this.GetProperty("manufacturer"); }
+            set { this.Properties["manufacturer"] = value; }
+        }
+
+        public string ManufacturerUrl
+        {
+            get { return this.GetProperty("manufacturerURL"); }
+            set { this.Properties["manufacturerURL"] = value; }
+        }
+
+        public string ModelDescription
+        {
+            get { return this.GetProperty("modelDescription"); }
+            set { this.Properties["modelDescription"] = value; }
+        }
+
+        public string ModelName
+        {
+            get { return this.GetProperty("modelName"); }
+            set { this.Properties["modelName"] = value; }
+        }
+
+        public string ModelNumber
+        {
+            get { return this.GetProperty("modelNumber"); }
+            set { this.Properties["modelNumber"] = value; }
+        }
+
+        public string ModelUrl
+        {
+            get { return this.GetProperty("modelURL"); }
+            set { this.Properties["modelURL"] = value; }
+        }
+
+        public string SerialNumber
+        {
+            get { return this.GetProperty("serialNumber"); }
+            set { this.Properties["serialNumber"] = value; }
+        }
+
+        public string UPC
+        {
+            get { return this.GetProperty("UPC"); }
+            set { this.Properties["UPC"] = value; }
+        }
+
+        private string GetProperty(string property)
+        {
+            if (this.Properties.ContainsKey(property))
+                return this.Properties[property];
+
+            return string.Empty;
+        }
         #endregion
 
     }
