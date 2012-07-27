@@ -18,18 +18,19 @@ namespace Automaters.Discovery.Upnp
             this.Properties = new Dictionary<string, string>();
             this.IsEnabled = true;
 
-            this.Devices = new CustomActionCollection<UpnpDevice>((device) =>
+            this.Devices = new CustomActionCollection<UpnpDevice>(
+                device =>
                 {
                     device.Parent = this;
                     device.Root = this.Root;
                 },
-                (device) =>
+                device =>
                 {
                     device.Parent = null;
                     device.Root = null;
                 });
-            this.Services = new CustomActionCollection<UpnpService>((service) => service.Device = this, (service) => service.Device = null);
-            this.Icons = new CustomActionCollection<UpnpIcon>((icon) => icon.Device = this, (icon) => icon.Device = null);
+            this.Services = new CustomActionCollection<UpnpService>(service => service.Device = this, service => service.Device = null);
+            this.Icons = new CustomActionCollection<UpnpIcon>(icon => icon.Device = this, icon => icon.Device = null);
         }
 
         #region Object Overrides 
