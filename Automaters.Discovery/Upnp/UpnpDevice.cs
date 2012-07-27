@@ -233,5 +233,15 @@ namespace Automaters.Discovery.Upnp
         }
         #endregion
 
+        public IEnumerable<UpnpDevice> FindByDeviceType(UpnpType type)
+        {
+            if (this.Type.Equals(type))
+                yield return this;
+
+            foreach (var device in this.Devices.SelectMany(device => device.FindByDeviceType(type)))
+            {
+                yield return device;
+            }
+        }
     }
 }

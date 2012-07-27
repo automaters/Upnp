@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -130,5 +131,16 @@ namespace Automaters.Discovery.Upnp
 
         #endregion
 
+        public IEnumerable<UpnpDevice> FindByDeviceType(UpnpType type)
+        {
+            var root = this.RootDevice;
+            if(root == null)
+                yield break;
+
+            foreach(var device in root.FindByDeviceType(type))
+            {
+                yield return device;
+            }
+        }
     }
 }

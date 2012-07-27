@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Automaters.Discovery.Upnp
 {
-    public class UpnpType
+    public class UpnpType : IEquatable<UpnpType>
     {
 
         #region Constructors
@@ -51,6 +51,17 @@ namespace Automaters.Discovery.Upnp
         public override int GetHashCode()
         {
             return this.Domain.GetHashCode() ^ this.Kind.GetHashCode() ^ this.Type.GetHashCode() ^ this.Version.GetHashCode();
+        }
+
+        public bool Equals(UpnpType other)
+        {
+            if(other == null)
+                return false;
+
+            return (other.Domain == this.Domain && 
+                    other.Kind == this.Kind && 
+                    other.Type == this.Type && 
+                    other.Version == this.Version);
         }
 
         public override string ToString()
