@@ -54,6 +54,7 @@
     <Compile Include="Upnp\UpnpDevice.cs" />
     <Compile Include="Upnp\UpnpIcon.cs" />
     <Compile Include="Upnp\UpnpRoot.cs" />
+    <Compile Include="Upnp\UpnpServer.cs" />
     <Compile Include="Upnp\UpnpService.cs" />
     <Compile Include="Upnp\UpnpServiceDescription.cs" />
     <Compile Include="Upnp\UpnpStateVariable.cs" />
