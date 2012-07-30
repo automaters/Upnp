@@ -95,10 +95,24 @@ namespace Automaters.Discovery.Upnp
             set;
         }
 
+        private Uri _deviceDescriptionUrl;
+
         public Uri DeviceDescriptionUrl
         {
-            get;
-            set;
+            get { return _deviceDescriptionUrl; }
+            set
+            {
+                _deviceDescriptionUrl = value;
+
+                if (_deviceDescriptionUrl == null)
+                {
+                    this.UrlBase = null;
+                    return;
+                }
+
+                var builder = new UriBuilder(_deviceDescriptionUrl) { Path = string.Empty };
+                this.UrlBase = builder.Uri;
+            }
         }
 
         public Uri UrlBase

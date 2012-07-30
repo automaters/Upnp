@@ -7,7 +7,7 @@ using Automaters.Discovery.Ssdp;
 
 namespace Automaters.Discovery.Upnp
 {
-    public class UpnpServer
+    public class UpnpServer : IDisposable
     {
         public UpnpRoot Root { get; private set; }
 
@@ -63,6 +63,11 @@ namespace Automaters.Discovery.Upnp
         public void StartListening(params IPEndPoint[] remoteEps)
         {
             this._ssdp.StartListening(remoteEps);
+        }
+
+        public void Dispose()
+        {
+            this._ssdp.Dispose();
         }
     }
 }

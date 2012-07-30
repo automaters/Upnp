@@ -156,7 +156,7 @@ namespace Automaters.Discovery.Ssdp
         {
             lock (this.Announcers)
             {
-                foreach (var pair in this.Announcers.Where(pair => pair.Value == true))
+                foreach (var pair in this.Announcers.Where(pair => pair.Value))
                 {
                     if (msg.SearchType == Protocol.SsdpAll)
                         yield return pair.Key;
