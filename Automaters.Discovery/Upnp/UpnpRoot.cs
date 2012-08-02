@@ -14,6 +14,11 @@ namespace Automaters.Discovery.Upnp
 {
     public class UpnpRoot : IXmlSerializable
     {
+        public UpnpRoot(int majorVersion = 1, int minorVersion = 1)
+        {
+            this.UpnpMajorVersion = majorVersion;
+            this.UpnpMinorVersion = minorVersion;
+        }
 
         #region Object Overrides
 
@@ -71,7 +76,7 @@ namespace Automaters.Discovery.Upnp
             writer.WriteElementString("major", this.UpnpMajorVersion.ToString());
             writer.WriteElementString("minor", this.UpnpMinorVersion.ToString());
             writer.WriteEndElement();
-            writer.WriteElementString("URLBase", this.UrlBase.ToString());
+            writer.WriteElementString("URLBase", this.UpnpMinorVersion == 0 ? this.UrlBase.ToString() : string.Empty);
 
             if (this.RootDevice != null)
                 this.RootDevice.WriteXml(writer);
