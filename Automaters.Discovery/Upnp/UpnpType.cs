@@ -55,13 +55,23 @@ namespace Automaters.Discovery.Upnp
 
         public bool Equals(UpnpType other)
         {
-            if(other == null)
+            if((object)other == null)
                 return false;
 
             return (other.Domain == this.Domain && 
                     other.Kind == this.Kind && 
                     other.Type == this.Type && 
                     other.Version == this.Version);
+        }
+
+        public static bool operator ==(UpnpType a, UpnpType b)
+        {
+            return a.Equals(b);
+        }
+
+        public static bool operator !=(UpnpType a, UpnpType b)
+        {
+            return !(a == b);
         }
 
         public override string ToString()

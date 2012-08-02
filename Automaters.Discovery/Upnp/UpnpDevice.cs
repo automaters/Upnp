@@ -209,17 +209,22 @@ namespace Automaters.Discovery.Upnp
 
             return string.Empty;
         }
+  
         #endregion
 
         public IEnumerable<UpnpDevice> FindByDeviceType(UpnpType type)
         {
-            if (this.Type.Equals(type))
-                yield return this;
+            return this.EnumerateDevices().Where(d => d.Type.Equals(type));
+        }
 
-            foreach (var device in this.Devices.SelectMany(device => device.FindByDeviceType(type)))
-            {
-                yield return device;
-            }
+        public IEnumerable<UpnpDevice> EnumerateDevices()
+        {
+            return new[] { this }.Concat(this.Devices.SelectMany(d => d.EnumerateDevices()));
+        }
+
+        public IEnumerable<UpnpService> EnumerateServices()
+        {
+            return this.EnumerateDevices().SelectMany(device => device.Services);
         }
     }
 }
