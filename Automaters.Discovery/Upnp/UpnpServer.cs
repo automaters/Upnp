@@ -31,21 +31,21 @@ namespace Automaters.Discovery.Upnp
             ad.MaxAge = this.AdvertisementAge;
             ad.Start();
         }
-
+  
         private void BuildAdvertisements()
         {
-            CreateAdvertisement("upnp:rootdevice", string.Format ("uuid:{0}::upnp:rootdevice", this.Root.RootDevice.UDN));
+            CreateAdvertisement("upnp:rootdevice", string.Format ("{0}::upnp:rootdevice", this.Root.RootDevice.UDN));
 
             BuildAdvertisementsForDevice(this.Root.RootDevice);
         }
-
+  
         private void BuildAdvertisementsForDevice(UpnpDevice device)
         {
-            var notificationType = "uuid:" + device.UDN;
+            var notificationType = device.UDN;
             CreateAdvertisement (notificationType, notificationType);
 
             var type = device.Type.ToString();
-            CreateAdvertisement (type, string.Format ("uuid:{0}::{1}", device.UDN, type));
+            CreateAdvertisement (type, string.Format ("{0}::{1}", device.UDN, type));
 
             foreach (var service in device.Services)
                 BuildAdvertisementsForService (service);
@@ -53,11 +53,16 @@ namespace Automaters.Discovery.Upnp
             foreach (var child in device.Devices)
                 BuildAdvertisementsForDevice(child);
         }
-
+  
         private void BuildAdvertisementsForService(UpnpService service)
         {
             var type = service.Type.ToString ();
-            CreateAdvertisement (type, string.Format ("uuid:{0}::{1}", service.Device.UDN, type));
+            CreateAdvertisement (type, string.Format ("{0}::{1}", service.Device.UDN, type));
+        }
+  
+        public void StopListening()
+        {
+            this._ssdp.StopListening();
         }
 
         public void StartListening(params IPEndPoint[] remoteEps)

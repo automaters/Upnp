@@ -49,6 +49,7 @@
     <Compile Include="Ssdp\SsdpSearch.cs" />
     <Compile Include="Ssdp\SsdpMessage.cs" />
     <Compile Include="Ssdp\SsdpSocket.cs" />
+    <Compile Include="Upnp\UniqueDeviceName.cs" />
     <Compile Include="Upnp\UpnpAction.cs" />
     <Compile Include="Upnp\UpnpArgument.cs" />
     <Compile Include="Upnp\UpnpDevice.cs" />
