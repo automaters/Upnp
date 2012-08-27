@@ -2,13 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Automaters.Core.Net;
-using System.Net;
-using System.Net.Sockets;
 using Automaters.Core.Collections;
-using System.Threading;
-using Automaters.Core;
-using System.IO;
 using Automaters.Core.Timers;
 
 namespace Automaters.Discovery.Ssdp
@@ -16,7 +10,7 @@ namespace Automaters.Discovery.Ssdp
     /// <summary>
     /// Server class for sending out SSDP announcements and responding to searches
     /// </summary>
-    public class SsdpServer : IDisposable
+    public class SsdpServer : SsdpListener
     {
 
         #region Constructor
@@ -27,82 +21,11 @@ namespace Automaters.Discovery.Ssdp
         public SsdpServer()
         {
             this.Announcers = new Dictionary<SsdpAnnouncer, bool>();
-            this.Server = new SsdpSocket(new IPEndPoint(IPAddress.Any, 1900));
-            this.Server.DataReceived += this.OnDataReceived;
         }
 
         #endregion
 
         #region Public Methods
-
-        /// <summary>
-        /// Starts listening on the specified remote endpoints.
-        /// </summary>
-        /// <param name="remoteEps">The remote eps.</param>
-        public void StartListening(params IPEndPoint[] remoteEps)
-        {
-            if (remoteEps == null || remoteEps.Length == 0)
-                remoteEps = new IPEndPoint[] { Protocol.DiscoveryEndpoints.IPv4 };
-
-            lock (this.Server)
-            {
-                if (!this.Server.IsListening)
-                    this.Server.StartListening();
-
-                this.Server.EnableBroadcast = true;
-
-                // Join all the multicast groups specified
-                foreach (IPEndPoint ep in remoteEps.Where(ep => IPAddressHelpers.IsMulticast(ep.Address)))
-                    this.Server.JoinMulticastGroupAllInterfaces(ep);
-            }
-        }
-
-        /// <summary>
-        /// Stops listening on the specified remote endpoints.
-        /// </summary>
-        /// <param name="remoteEps">The remote eps.</param>
-        public void StopListeningOn(params IPEndPoint[] remoteEps)
-        {
-            // If nothing specified then just stop listening on all
-            if (remoteEps == null || remoteEps.Length == 0)
-            {
-                this.StopListening();
-                return;
-            }
-
-            lock (this.Server)
-            {
-                if (!this.Server.IsListening)
-                    return;
-
-                // Drop all the multicast groups specified
-                foreach (IPEndPoint ep in remoteEps.Where(ep => IPAddressHelpers.IsMulticast(ep.Address)))
-                {
-                    try
-                    {
-                        this.Server.DropMulticastGroup(ep.Address);
-                    }
-                    catch (SocketException)
-                    {
-                        // If we're not part of this group then it will throw an error so just ignore it
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Stops listening on all end points.
-        /// </summary>
-        public void StopListening()
-        {
-            lock (this.Server)
-            {
-                if (!this.Server.IsListening)
-                    return;
-
-                this.Server.StopListening();
-            }
-        }
 
         /// <summary>
         /// Creates the announcer.
@@ -195,32 +118,7 @@ namespace Automaters.Discovery.Ssdp
 
         #region Events
 
-        /// <summary>
-        /// Called when [data received].
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="Automaters.Core.EventArgs&lt;Automaters.Core.Net.NetworkData&gt;"/> instance containing the event data.</param>
-        protected virtual void OnDataReceived(object sender, EventArgs<NetworkData> e)
-        {
-            // Queue this response to be processed
-            ThreadPool.QueueUserWorkItem(data =>
-            {
-                try
-                {
-                    // Parse our message and fire our event
-                    using (var stream = new MemoryStream(e.Value.Buffer, 0, e.Value.Length))
-                    {
-                        this.OnSsdpMessageReceived(new SsdpMessage(HttpMessage.Parse(stream), e.Value.RemoteIPEndpoint));
-                    }
-                }
-                catch (ArgumentException ex)
-                {
-                    System.Diagnostics.Trace.TraceError("Failed to parse SSDP response: {0}", ex.ToString());
-                }
-            });
-        }
-
-        protected virtual void OnSsdpMessageReceived(SsdpMessage msg)
+        protected override void OnSsdpMessageReceived(SsdpMessage msg)
         {
             // Ignore any advertisements
             if (msg.IsAdvertisement)
@@ -240,18 +138,6 @@ namespace Automaters.Discovery.Ssdp
 
         protected static readonly TimeoutDispatcher Dispatcher = new TimeoutDispatcher();
 
-        /// <summary>
-        /// Gets or sets the server.
-        /// </summary>
-        /// <value>
-        /// The server.
-        /// </value>
-        protected SsdpSocket Server
-        {
-            get;
-            set;
-        }
-
         protected Dictionary<SsdpAnnouncer, bool> Announcers
         {
             get;
@@ -261,20 +147,18 @@ namespace Automaters.Discovery.Ssdp
         #endregion
 
         #region IDisposable Implementation
-
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            lock (this.Announcers)
+            if (disposing)
             {
-                this.Announcers.Clear();
+                lock (this.Announcers)
+                {
+                    this.Announcers.Clear();
+                }
             }
 
-            this.Server.Close();
+            base.Dispose(disposing);
         }
-
         #endregion
 
     }

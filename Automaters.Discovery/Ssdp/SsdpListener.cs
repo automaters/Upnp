@@ -1,40 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
+using System.IO;
 using System.Linq;
-using System.Text;
-using Automaters.Core;
 using System.Net;
-using Automaters.Core.Net;
 using System.Net.Sockets;
+using System.Threading;
+using Automaters.Core;
+using Automaters.Core.Net;
 
 namespace Automaters.Discovery.Ssdp
 {
-    /// <summary>
-    /// Class for listening to SSDP Advertisements (Alive/ByeBye)
-    /// </summary>
     public class SsdpListener : IDisposable
     {
-
-        #region Constructors
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="SsdpListener"/> class.
+        /// Initializes a new instance of the <see cref="SsdpServer"/> class.
         /// </summary>
-        /// <param name="server">The server.</param>
-        public SsdpListener(SsdpSocket server = null)
+        public SsdpListener()
         {
-            if (server == null)
-            {
-                server = new SsdpSocket(new IPEndPoint(IPAddress.Any, 1900));
-                this.OwnsServer = true;
-            }
-
-            this.Server = server;
+            this.Server = new SsdpSocket(new IPEndPoint(IPAddress.Any, 1900));
+            this.Server.SsdpMessageReceived += this.OnSsdpMessageReceived;
         }
 
-        #endregion
-
-        #region Public Methods
+        /// <summary>
+        /// Gets or sets the server.
+        /// </summary>
+        /// <value>
+        /// The server.
+        /// </value>
+        protected SsdpSocket Server
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Starts listening on the specified remote endpoints.
@@ -49,6 +45,8 @@ namespace Automaters.Discovery.Ssdp
             {
                 if (!this.Server.IsListening)
                     this.Server.StartListening();
+
+                this.Server.EnableBroadcast = true;
 
                 // Join all the multicast groups specified
                 foreach (IPEndPoint ep in remoteEps.Where(ep => IPAddressHelpers.IsMulticast(ep.Address)))
@@ -103,29 +101,32 @@ namespace Automaters.Discovery.Ssdp
             }
         }
 
-        #endregion
-
-        #region Events
-
-        /// <summary>
-        /// Called when an SSDP message is received.
-        /// </summary>
-        /// <param name="msg">The message.</param>
-        protected void OnSsdpMessageReceived(SsdpMessage msg)
-        {
-            var handler = this.SsdpMessageReceived;
-            if (handler != null)
-                handler(this, new EventArgs<SsdpMessage>(msg));
-
-            var handler2 = (msg.IsAlive ? this.SsdpAlive : this.SsdpByeBye);
-            if (handler != null)
-                handler2(this, new EventArgs<SsdpMessage>(msg));
-        }
-
         /// <summary>
         /// Occurs when an SSDP message is received.
         /// </summary>
         public event EventHandler<EventArgs<SsdpMessage>> SsdpMessageReceived;
+
+        /// <summary>
+        /// Called when an SSDP message is received.
+        /// </summary>
+        /// <param name="sender"> </param>
+        /// <param name="msg">The message.</param>
+        private void OnSsdpMessageReceived(object sender, EventArgs<SsdpMessage> msg)
+        {
+            OnSsdpMessageReceived(msg.Value);
+        }
+
+        protected virtual void OnSsdpMessageReceived(SsdpMessage ssdpMessage)
+        {
+            var handler = this.SsdpMessageReceived;
+            if (handler != null)
+                handler(this, new EventArgs<SsdpMessage>(ssdpMessage));
+
+            if (ssdpMessage.IsAlive)
+                this.OnSsdpAlive(ssdpMessage);
+            else if (ssdpMessage.IsByeBye)
+                this.OnSsdpByeBye(ssdpMessage);
+        }
 
         /// <summary>
         /// Occurs when SSDP alive received.
@@ -133,64 +134,50 @@ namespace Automaters.Discovery.Ssdp
         public event EventHandler<EventArgs<SsdpMessage>> SsdpAlive;
 
         /// <summary>
+        /// Occurs when SSDP alive received
+        /// </summary>
+        /// <param name="msg"></param>
+        protected virtual void OnSsdpAlive(SsdpMessage msg)
+        {
+            var handler = this.SsdpAlive;
+            if (handler != null)
+                handler(this, new EventArgs<SsdpMessage>(msg));
+        }
+
+        /// <summary>
         /// Occurs when SSDP bye bye.
         /// </summary>
         public event EventHandler<EventArgs<SsdpMessage>> SsdpByeBye;
 
-        #endregion
-
-        #region Properties
-
         /// <summary>
-        /// Gets or sets the server.
+        /// Occurs when SSDP bye bye
         /// </summary>
-        /// <value>
-        /// The server.
-        /// </value>
-        protected SsdpSocket Server
+        /// <param name="msg"></param>
+        protected virtual void OnSsdpByeBye(SsdpMessage msg)
         {
-            get;
-            set;
+            var handler = this.SsdpByeBye;
+            if (handler != null)
+                handler(this, new EventArgs<SsdpMessage>(msg));
         }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether [owns server].
-        /// </summary>
-        /// <value>
-        ///   <c>true</c> if [owns server]; otherwise, <c>false</c>.
-        /// </value>
-        protected bool OwnsServer
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether this instance is listening.
-        /// </summary>
-        /// <value>
-        /// 	<c>true</c> if this instance is listening; otherwise, <c>false</c>.
-        /// </value>
-        public bool IsListening
-        {
-            get { return this.Server.IsListening; }
-        }
-
-        #endregion
-            
-        #region IDisposable Implementation
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
-        public void  Dispose()
+        protected virtual void Dispose(bool disposing)
         {
-            // Only close the server if we own it
-            if (this.OwnsServer)
- 	            this.Server.Close();
+            if(!disposing)
+                return;
+
+            this.Server.Close();
         }
 
-        #endregion
-
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
     }
 }
