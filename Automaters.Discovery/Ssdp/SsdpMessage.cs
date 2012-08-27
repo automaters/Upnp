@@ -101,7 +101,18 @@ namespace Automaters.Discovery.Ssdp
         /// </value>
         public bool IsAlive
         {
-            get { return (this.Message.Headers.ValueOrDefault("NTS", string.Empty).ToLower() != Protocol.SsdpByeByeNts.ToLower()); }
+            get { return (this.Message.Headers.ValueOrDefault("NTS", string.Empty).ToLower() == Protocol.SsdpAliveNts.ToLower()); }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this is an alive message.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if this is an alive message; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsByeBye
+        {
+            get { return (this.Message.Headers.ValueOrDefault("NTS", string.Empty).ToLower() == Protocol.SsdpByeByeNts.ToLower()); }
         }
 
         /// <summary>
