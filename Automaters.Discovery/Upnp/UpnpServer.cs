@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using Automaters.Discovery.Gena;
 using Automaters.Discovery.Ssdp;
 
 namespace Automaters.Discovery.Upnp
@@ -12,12 +13,18 @@ namespace Automaters.Discovery.Upnp
         public UpnpRoot Root { get; private set; }
 
         private readonly SsdpServer _ssdp;
+        private readonly GenaServer _gena;
+#if DEBUG
+        private readonly ushort AdvertisementAge = 30;
+#else
         private readonly ushort AdvertisementAge = 1800;
+#endif
 
-        public UpnpServer(UpnpRoot root)
+        public UpnpServer(UpnpRoot root, SsdpServer ssdp = null, GenaServer gena = null)
         {
             this.Root = root;
-            this._ssdp = new SsdpServer();
+            this._ssdp = ssdp ?? new SsdpServer();
+            this._gena = gena ?? new GenaServer();
             
             BuildAdvertisements();
         }

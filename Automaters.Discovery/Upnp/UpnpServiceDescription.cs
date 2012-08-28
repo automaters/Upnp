@@ -28,21 +28,18 @@ namespace Automaters.Discovery.Upnp
             return null;
         }
 
-        public void ReadXml(System.Xml.XmlReader reader)
+        public void ReadXml(XmlReader reader)
         {
             if (reader.LocalName != "scpd" && !reader.ReadToDescendant("scpd"))
                 throw new InvalidDataException();
 
             var dict = new Dictionary<string, Action>()
             {
-                {"specVersion", () => 
+                {"specVersion", () => XmlHelper.ParseXml(reader, new Dictionary<string, Action>
                     {
-                        XmlHelper.ParseXml(reader, new Dictionary<string, Action>
-                            {
-                                {"major", () => this.VersionMajor = reader.ReadElementContentAsInt()},
-                                {"minor", () => this.VersionMinor = reader.ReadElementContentAsInt()}
-                            });
-                    }
+                        {"major", () => this.VersionMajor = reader.ReadElementContentAsInt()},
+                        {"minor", () => this.VersionMinor = reader.ReadElementContentAsInt()}
+                    })
                 },
                 {"actionList", () => XmlHelper.ParseXmlCollection(reader, this.Actions, "action", () => new UpnpAction())},
                 {"serviceStateTable", () => XmlHelper.ParseXmlCollection(reader, this.Variables, "stateVariable", () => new UpnpStateVariable())}
@@ -51,7 +48,7 @@ namespace Automaters.Discovery.Upnp
             XmlHelper.ParseXml(reader, dict);
         }
 
-        public void WriteXml(System.Xml.XmlWriter writer)
+        public void WriteXml(XmlWriter writer)
         {
             writer.WriteStartElement("scpd");
             writer.WriteAttributeString("xmlns", "urn:schemas-upnp-org:service-1-0");

@@ -170,7 +170,7 @@ namespace Automaters.Discovery.Upnp
             return this.RootDevice.EnumerateDevices();            
         }
 
-        public IEnumerable<UpnpService> EnumerateServices(bool recursive = true)
+        public IEnumerable<UpnpService> EnumerateServices()
         {
             return this.EnumerateDevices().SelectMany(d => d.Services);
         }
