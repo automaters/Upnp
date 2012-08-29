@@ -67,7 +67,7 @@ namespace Automaters.Discovery.Gena
             get { return _value; }
             set
             {
-                if ((object)_value != (object) value) 
+                if ((object)_value == (object) value) 
                     return;
 
                 this._value = value;
