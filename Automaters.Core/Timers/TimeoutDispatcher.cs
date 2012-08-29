@@ -175,10 +175,11 @@ namespace Automaters.Core.Timers
                     }
 
                     // If our next timeout is not ready then wait for it to be
-                    if (!nextTimeout.IsElapsed)
+                    var timeRemaining = nextTimeout.TimeRemaining;
+                    if (timeRemaining.TotalMilliseconds > 0)
                     {
                         // Wait until we get pulsed or our timeout is up then make sure we're still running and try again
-                        Monitor.Wait(this.TimeoutObjects, nextTimeout.TimeRemaining);
+                        Monitor.Wait(this.TimeoutObjects, timeRemaining);
                         continue;
                     }
 
