@@ -38,8 +38,10 @@ namespace Automaters.Discovery.Gena
             }
 
             sub.Callbacks = request.Callbacks;
+            sub.RenewInterval = request.Timeout ?? TimeSpan.MaxValue;
 
-            _dispatcher.Add(() => CheckSubscription(sub), sub.RenewInterval);
+            if(sub.RenewInterval != TimeSpan.MaxValue)
+                _dispatcher.Add(() => CheckSubscription(sub), sub.RenewInterval);
 
 
             //update timeout value if one is present
@@ -126,10 +128,10 @@ namespace Automaters.Discovery.Gena
         {
             var timeout = request.Timeout;
             if (timeout.HasValue)
-                sub.Timeout = timeout.Value;
+                sub.RenewInterval = timeout.Value;
 
             response.SubscriptionId = sub.SubscriptionId;
-            response.Timeout = sub.Timeout;
+            response.Timeout = sub.RenewInterval;
             response.Date = DateTime.Now;
             response.UserAgent = String.Format("{0}/{1} UPnP/1.1 UPnPLib/1.1", Environment.OSVersion.Platform, Environment.OSVersion.Version); ;
         }

@@ -42,8 +42,6 @@ namespace Automaters.Discovery.Gena
         /// </summary>
         public TimeSpan RenewInterval { get; set; }
 
-        public TimeSpan Timeout { get; set; }
-
         public GenaSubscription()
         {
             this.LastRenewal = DateTime.Now;
@@ -80,17 +78,19 @@ namespace Automaters.Discovery.Gena
                     {
                         
                         var request = (HttpWebRequest) WebRequest.Create(uri);
+                        
+                        request.ServicePoint.Expect100Continue = false;
                         request.Method = "NOTIFY";
                         request.ContentType = "text/xml; charset=\"utf-8\"";
 
                         request.Headers.Add("NT", "upnp:event");
                         request.Headers.Add("NTS", "upnp:propchange");
-                        request.Headers.Add("SID", string.Format("uuid:{0}", this.SubscriptionId));
+                        request.Headers.Add("SID", this.SubscriptionId);
                         request.Headers.Add("SEQ", key.ToString());
 
                         using (var stream = request.GetRequestStream())
                         {
-                            var writer = new XmlTextWriter(stream, Encoding.UTF8);
+                            var writer = new XmlTextWriter(stream, Encoding.ASCII);
                             props.WriteXml(writer);
                             writer.Close();
                         }

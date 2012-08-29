@@ -147,7 +147,7 @@ namespace Automaters.Discovery.Gena
                 }
                 else
                 {
-                    timeoutString = "Seconds-" + timeout.TotalSeconds;
+                    timeoutString = "Second-" + timeout.TotalSeconds;
                 }
 
                 this.Message.Headers["timeout"] = timeoutString;
