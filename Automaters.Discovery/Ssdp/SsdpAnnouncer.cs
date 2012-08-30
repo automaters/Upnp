@@ -35,7 +35,7 @@ namespace Automaters.Discovery.Ssdp
             this.NotificationType = string.Empty;
             this.Location = string.Empty;
             this.USN = string.Empty;
-            this.RemoteEndPoints = new SyncCollection<IPEndPoint>() { Protocol.DiscoveryEndpoints.IPv4 };
+            this.RemoteEndPoints = new SyncCollection<IPEndPoint>() { Protocol.DiscoveryEndpoints.IPv4, Protocol.DiscoveryEndpoints.Broadcast };
         }
 
         #endregion
@@ -97,10 +97,9 @@ namespace Automaters.Discovery.Ssdp
         public void SendAliveMessage()
         {
             // TODO: Do we need to make sure we join these multicast groups?
-
             foreach (IPEndPoint ep in this.RemoteEndPoints)
             {
-                byte[] bytes = Encoding.ASCII.GetBytes(Protocol.CreateAliveNotify(Protocol.DiscoveryEndpoints.IPv4,
+                byte[] bytes = Encoding.ASCII.GetBytes(Protocol.CreateAliveNotify(ep,
                     this.Location, this.NotificationType, this.USN, this.MaxAge, this.UserAgent));
                 this.Server.Send(bytes, bytes.Length, ep);
             }

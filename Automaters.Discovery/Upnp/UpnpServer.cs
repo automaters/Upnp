@@ -14,6 +14,8 @@ namespace Automaters.Discovery.Upnp
 
         private readonly SsdpServer _ssdp;
         private readonly GenaServer _gena;
+        private readonly List<SsdpAnnouncer> _announcers = new List<SsdpAnnouncer>();
+
 #if DEBUG
         private readonly ushort AdvertisementAge = 30;
 #else
@@ -25,7 +27,7 @@ namespace Automaters.Discovery.Upnp
             this.Root = root;
             this._ssdp = ssdp ?? new SsdpServer();
             this._gena = gena ?? new GenaServer();
-            
+
             BuildAdvertisements();
         }
 
@@ -36,7 +38,7 @@ namespace Automaters.Discovery.Upnp
             ad.USN = usn;
             ad.Location = this.Root.DeviceDescriptionUrl.ToString();
             ad.MaxAge = this.AdvertisementAge;
-            ad.Start();
+            _announcers.Add(ad);
         }
   
         private void BuildAdvertisements()
@@ -70,11 +72,17 @@ namespace Automaters.Discovery.Upnp
         public void StopListening()
         {
             this._ssdp.StopListening();
+
+            foreach (var announcer in _announcers)
+                announcer.Shutdown();
         }
 
         public void StartListening(params IPEndPoint[] remoteEps)
         {
             this._ssdp.StartListening(remoteEps);
+
+            foreach (var announcer in _announcers)
+                announcer.Start();
         }
 
         public void Dispose()
