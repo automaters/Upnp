@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Net;
 
-namespace Automaters.Discovery.Ssdp
+namespace Upnp.Ssdp
 {
     /// <summary>
     /// Class containing several protocol specific constants and helper functions

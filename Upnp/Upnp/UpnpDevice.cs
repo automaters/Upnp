@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Xml.Serialization;
 using System.Xml;
-using Automaters.Core;
 using System.IO;
-using Automaters.Core.Collections;
+using Upnp.Collections;
+using Upnp.Xml;
 
-namespace Automaters.Discovery.Upnp
+namespace Upnp.Upnp
 {
     public class UpnpDevice : IXmlSerializable
     {

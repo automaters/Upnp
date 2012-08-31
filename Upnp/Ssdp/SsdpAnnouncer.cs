@@ -1,17 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Automaters.Core.Net;
-using Automaters.Core.Timers;
 using System.Net;
-using Automaters.Core.Collections;
+using Upnp.Collections;
+using Upnp.Timers;
 
-namespace Automaters.Discovery.Ssdp
+namespace Upnp.Ssdp
 {
 
     /// <summary>

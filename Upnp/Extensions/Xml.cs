@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Serialization;
 
-namespace Automaters.Core.Extensions
+namespace Upnp.Extensions
 {
     public static class Xml
     {

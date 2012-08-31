@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using Automaters.Discovery.Gena;
-using Automaters.Discovery.Ssdp;
+using Upnp.Gena;
+using Upnp.Ssdp;
 
-namespace Automaters.Discovery.Upnp
+namespace Upnp.Upnp
 {
     public class UpnpServer : IDisposable
     {

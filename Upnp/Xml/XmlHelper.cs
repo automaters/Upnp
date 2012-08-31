@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Xml;
-using Automaters.Core.Extensions;
 using System.Xml.Serialization;
 
-namespace Automaters.Core
+namespace Upnp.Xml
 {
     public static class XmlHelper
     {

@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Automaters.Core.Net;
-using Automaters.Core.Extensions;
 using System.Net;
+using Upnp.Extensions;
+using Upnp.Net;
 
-namespace Automaters.Discovery.Ssdp
+namespace Upnp.Ssdp
 {
     /// <summary>
     /// Class representing an SSDP request/response message

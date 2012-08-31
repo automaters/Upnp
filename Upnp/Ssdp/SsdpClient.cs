@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Automaters.Core;
-using System.Net;
 
-namespace Automaters.Discovery.Ssdp
+namespace Upnp.Ssdp
 {
     /// <summary>
     /// Class to combine the functionality of SsdpListener and SsdpSearch
@@ -78,7 +74,7 @@ namespace Automaters.Discovery.Ssdp
         /// Called when [search response].
         /// </summary>
         /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="Automaters.Core.EventArgs&lt;Automaters.Discovery.Ssdp.SsdpMessage&gt;"/> instance containing the event data.</param>
+        /// <param name="e">The <see cref="EventArgs{T}.Discovery.Ssdp.SsdpMessage&gt;"/> instance containing the event data.</param>
         protected virtual void OnSearchResponse(object sender, EventArgs<SsdpMessage> e)
         {
             var handler = this.SearchResponse;

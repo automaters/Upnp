@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Xml.Serialization;
 using System.Xml;
 using System.IO;
-using Automaters.Core;
+using Upnp.Xml;
 
-namespace Automaters.Discovery.Upnp
+namespace Upnp.Upnp
 {
     public class UpnpIcon : IXmlSerializable
     {

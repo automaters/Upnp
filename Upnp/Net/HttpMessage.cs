@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-using Automaters.Core.Extensions;
 using System.Net;
-using System.Runtime.Serialization;
 
-namespace Automaters.Core.Net
+namespace Upnp.Net
 {
     /// <summary>
     /// Class to represent an HttpMessage
@@ -27,11 +22,11 @@ namespace Automaters.Core.Net
             this.Headers = new WebHeaderCollection();
             this.HttpVersion = "HTTP/1.1";
 
-            if (this.IsResponse)
-            {
-                this.ResponseCode = (int)HttpStatusCode.OK;
-                this.ResponseCodeDesc = "OK";
-            }
+            if (!this.IsResponse) 
+                return;
+
+            this.ResponseCode = (int)HttpStatusCode.OK;
+            this.ResponseCodeDesc = "OK";
         }
 
         /// <summary>

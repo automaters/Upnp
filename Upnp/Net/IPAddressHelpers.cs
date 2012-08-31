@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Net.NetworkInformation;
 using System.Net;
 using System.Net.Sockets;
 
-namespace Automaters.Core.Net
+namespace Upnp.Net
 {
     /// <summary>
     /// Helper functions for IPAddress information

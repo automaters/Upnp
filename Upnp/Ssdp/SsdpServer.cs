@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Automaters.Core.Collections;
-using Automaters.Core.Timers;
+using Upnp.Timers;
 
-namespace Automaters.Discovery.Ssdp
+namespace Upnp.Ssdp
 {
     /// <summary>
     /// Server class for sending out SSDP announcements and responding to searches

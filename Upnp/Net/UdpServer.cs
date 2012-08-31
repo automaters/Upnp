@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Net.Sockets;
 using System.Threading;
-using Automaters.Core;
 using System.Net;
 
-namespace Automaters.Core.Net
+namespace Upnp.Net
 {
     /// <summary>
     /// UDP Server designed for listening and eventing all data received

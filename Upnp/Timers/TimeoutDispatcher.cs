@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading;
 
-namespace Automaters.Core.Timers
+namespace Upnp.Timers
 {
 
     /// <summary>

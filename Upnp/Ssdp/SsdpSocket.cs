@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using Automaters.Core;
-using Automaters.Core.Net;
 using System.Net;
 using System.Net.Sockets;
+using Upnp.Net;
 
-namespace Automaters.Discovery.Ssdp
+namespace Upnp.Ssdp
 {
     public class SsdpSocket : UdpServer
     {

@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Automaters.Core.Net;
+using Upnp.Net;
 
-namespace Automaters.Discovery.Gena
+namespace Upnp.Gena
 {
     public class GenaMessage
     {

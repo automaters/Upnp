@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Xml.Serialization;
 using System.IO;
-using Automaters.Core;
+using Upnp.Xml;
 
-namespace Automaters.Discovery.Upnp
+namespace Upnp.Upnp
 {
     public class UpnpArgument : IXmlSerializable
     {

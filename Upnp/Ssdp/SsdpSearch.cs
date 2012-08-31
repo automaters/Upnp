@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Net;
-using Automaters.Core;
 using System.Threading;
-using Automaters.Core.Net;
 using System.IO;
-using Automaters.Core.Timers;
+using Upnp.Net;
+using Upnp.Timers;
 
-namespace Automaters.Discovery.Ssdp
+namespace Upnp.Ssdp
 {
     /// <summary>
     /// Class representing an SSDP Search
@@ -294,7 +293,7 @@ namespace Automaters.Discovery.Ssdp
         /// Called when [server data received].
         /// </summary>
         /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="Automaters.Core.EventArgs&lt;Automaters.Core.Net.NetworkData&gt;"/> instance containing the event data.</param>
+        /// <param name="e">The <see cref="EventArgs{T}.Core.Net.NetworkData&gt;"/> instance containing the event data.</param>
         protected virtual void OnServerDataReceived(object sender, EventArgs<NetworkData> e)
         {
             // Queue this response to be processed

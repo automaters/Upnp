@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
-using Automaters.Core;
+using Upnp.Xml;
 
-namespace Automaters.Discovery.Gena
+namespace Upnp.Gena
 {
     public interface IGenaProperty : INotifyPropertyChanged, IXmlSerializable
     {

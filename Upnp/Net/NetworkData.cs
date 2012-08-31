@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net;
+﻿using System.Net;
 
-namespace Automaters.Core.Net
+namespace Upnp.Net
 {
     /// <summary>
     /// Class that represents data transferred over the network

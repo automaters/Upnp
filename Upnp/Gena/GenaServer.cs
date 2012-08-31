@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Net;
-using System.Text;
-using Automaters.Core;
-using Automaters.Discovery.Upnp;
 
-namespace Automaters.Discovery.Gena
+namespace Upnp.Gena
 {
     public class GenaServer
     {

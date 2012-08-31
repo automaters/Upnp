@@ -8,8 +8,8 @@
     <ProjectGuid>{EA5F2B1A-8781-46E5-8455-7B2D87BB3D48}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Automaters.TestApp</RootNamespace>
-    <AssemblyName>Automaters.TestApp</AssemblyName>
+    <RootNamespace>Upnp.TestApp</RootNamespace>
+    <AssemblyName>Upnp.TestApp</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>

@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Automaters.Discovery.Ssdp;
-using System.Net;
-using Automaters.Core.Net;
+using Upnp.Ssdp;
 
-namespace Automaters.TestApp
+namespace Upnp.TestApp
 {
     class Program
     {
@@ -40,7 +35,7 @@ namespace Automaters.TestApp
                     search.SearchType = Protocol.SsdpAll;
 
                     // Attach our events for async search
-                    search.ResultFound += new EventHandler<Automaters.Core.EventArgs<SsdpMessage>>(search_ResultFound);
+                    search.ResultFound += new EventHandler<EventArgs<SsdpMessage>>(search_ResultFound);
                     search.SearchComplete += new EventHandler(search_SearchComplete);
 
                     Console.WriteLine();
@@ -73,7 +68,7 @@ namespace Automaters.TestApp
             Console.WriteLine("Search is complete!");
         }
 
-        static void search_ResultFound(object sender, Automaters.Core.EventArgs<SsdpMessage> e)
+        static void search_ResultFound(object sender, EventArgs<SsdpMessage> e)
         {
             Console.WriteLine(e.Value.Location);
         }

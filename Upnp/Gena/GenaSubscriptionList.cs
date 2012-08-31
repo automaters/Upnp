@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
-using Automaters.Core.Timers;
-using Automaters.Discovery.Upnp;
+using Upnp.Timers;
 
-namespace Automaters.Discovery.Gena
+namespace Upnp.Gena
 {
     class GenaSubscriptionList
     {

@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace Automaters.Core
+namespace Upnp
 {
     /// <summary>
     /// Generic EventArgs class
