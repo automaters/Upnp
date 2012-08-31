@@ -34,7 +34,7 @@ namespace Automaters.Core.Net
                 if (addr.Equals(IPAddress.Broadcast))
                     return false;
 
-                return (BitConverter.ToUInt32(new byte[] { 0, 0, 0, 224 }, 0) <= BitConverter.ToUInt32(addr.GetAddressBytes(), 0));
+                return ((addr.GetAddressBytes()[0] & 240) == 224);
             }
             
             return false;

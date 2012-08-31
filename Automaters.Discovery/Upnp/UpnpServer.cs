@@ -15,13 +15,7 @@ namespace Automaters.Discovery.Upnp
         private readonly SsdpServer _ssdp;
         private readonly GenaServer _gena;
         private readonly List<SsdpAnnouncer> _announcers = new List<SsdpAnnouncer>();
-
-#if DEBUG
-        private readonly ushort AdvertisementAge = 30;
-#else
-        private readonly ushort AdvertisementAge = 1800;
-#endif
-
+        
         public UpnpServer(UpnpRoot root, SsdpServer ssdp = null, GenaServer gena = null)
         {
             this.Root = root;
@@ -37,7 +31,6 @@ namespace Automaters.Discovery.Upnp
             ad.NotificationType = notificationType;
             ad.USN = usn;
             ad.Location = this.Root.DeviceDescriptionUrl.ToString();
-            ad.MaxAge = this.AdvertisementAge;
             _announcers.Add(ad);
         }
   

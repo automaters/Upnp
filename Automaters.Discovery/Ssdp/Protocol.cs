@@ -53,17 +53,18 @@ namespace Automaters.Discovery.Ssdp
         private static string AliveNotify =
             "NOTIFY * HTTP/1.1\r\n" +
             "HOST: {0}:{1}\r\n" +
-            "CACHE-CONTROL: max-age = {2}\r\n" +
+            "CACHE-CONTROL: max-age={2}\r\n" +
             "LOCATION: {3}\r\n" +
             "NT: {4}\r\n" +
             "NTS: ssdp:alive\r\n" +
             "SERVER: {5} UPnP/1.1 {6}\r\n" +
             "USN: {7}\r\n" +
+            "CONTENT-LENGTH: 0\r\n" +
             "\r\n";
 
         private static string AliveResponse =
             "HTTP/1.1 200 OK\r\n" +
-            "CACHE-CONTROL: max-age = {0}\r\n" +
+            "CACHE-CONTROL: max-age={0}\r\n" +
             "DATE: {1}\r\n" +
             "EXT:\r\n" +
             "LOCATION: {2}\r\n" +

@@ -1,7 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Automaters.Core.Net;
 using Automaters.Core.Timers;
 using System.Net;
 using Automaters.Core.Collections;
@@ -54,20 +59,26 @@ namespace Automaters.Discovery.Ssdp
                     return;
 
                 // Send our initial alive message
-                this.SendAliveMessage();
+                Task.Factory.StartNew(() => { 
+                    //add an initial random delay between 0-100ms;
+                    var random = new Random();
+                    Thread.Sleep(random.Next(0, 100));
 
-                // Create a new timeout to send out SSDP alive messages
-                // Also make sure we kick the first one off semi-instantly
-                this.TimeoutToken = Dispatcher.AddRepeating(() =>
-                {
-                    lock (this.SyncRoot)
+                    this.SendAliveMessage();
+
+                    // Create a new timeout to send out SSDP alive messages
+                    // Also make sure we kick the first one off semi-instantly
+                    this.TimeoutToken = Dispatcher.AddRepeating(() =>
                     {
-                        if (!this.IsRunning)
-                            return;
+                        lock (this.SyncRoot)
+                        {
+                            if (!this.IsRunning)
+                                return;
 
-                        this.SendAliveMessage();
-                    }
-                }, TimeSpan.FromSeconds(this.MaxAge));
+                            this.SendAliveMessage();
+                        }
+                    }, TimeSpan.FromSeconds(this.MaxAge));
+                });
             }
         }
 
