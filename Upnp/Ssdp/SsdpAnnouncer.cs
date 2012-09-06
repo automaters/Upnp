@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -53,28 +55,55 @@ namespace Upnp.Ssdp
                 if (this.IsRunning)
                     return;
 
-                // Send our initial alive message
-                Task.Factory.StartNew(() => { 
-                    //add an initial random delay between 0-100ms;
-                    var random = new Random();
-                    Thread.Sleep(random.Next(0, 100));
+                // Send our initial alive message adding an initial random delay between 0-100ms;
+                Dispatcher.Add(() =>
+                {
+                    this.SendSyncAliveMessage();
 
-                    this.SendAliveMessage();
+                    //queue up one more in case it got missed
+                    Dispatcher.Add(() => this.SendSyncAliveMessage(), TimeSpan.FromSeconds(new Random().Next(0, 100)));
+                }, TimeSpan.FromSeconds(new Random().Next(0, 100)));
 
-                    // Create a new timeout to send out SSDP alive messages
-                    // Also make sure we kick the first one off semi-instantly
-                    this.TimeoutToken = Dispatcher.AddRepeating(() =>
-                    {
-                        lock (this.SyncRoot)
-                        {
-                            if (!this.IsRunning)
-                                return;
-
-                            this.SendAliveMessage();
-                        }
-                    }, TimeSpan.FromSeconds(this.MaxAge));
-                });
+                StartAnnouncer();
             }
+        }
+
+        private void StartAnnouncer()
+        {
+            lock (this.SyncRoot)
+            {
+                // If we're already running then ignore this request
+                if (this.IsRunning)
+                    return;
+
+                // Create a new timeout to send out SSDP alive messages
+                // Also make sure we kick the first one off semi-instantly
+                this.TimeoutToken = Dispatcher.Add(() =>
+                {
+                    if (!SendSyncAliveMessage())
+                        return;
+
+                    StartAnnouncer();
+                }, GetNextAdvertWaitTime());
+            }
+        }
+
+        private bool SendSyncAliveMessage()
+        {
+            lock (this.SyncRoot)
+            {
+                if (!this.IsRunning)
+                    return false;
+
+                this.SendAliveMessage();
+            }
+
+            return true;
+        }
+
+        private TimeSpan GetNextAdvertWaitTime()
+        {
+            return TimeSpan.FromSeconds(new Random().Next(this.MaxAge/4, this.MaxAge/2));
         }
 
         /// <summary>
@@ -102,6 +131,8 @@ namespace Upnp.Ssdp
         /// </summary>
         public void SendAliveMessage()
         {
+            Trace.WriteLine(string.Format("Sending ALIVE {0}", this.USN), "SSDP");
+                
             // TODO: Do we need to make sure we join these multicast groups?
             foreach (IPEndPoint ep in this.RemoteEndPoints)
             {
