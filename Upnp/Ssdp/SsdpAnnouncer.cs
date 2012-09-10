@@ -56,13 +56,8 @@ namespace Upnp.Ssdp
                     return;
 
                 // Send our initial alive message adding an initial random delay between 0-100ms;
-                Dispatcher.Add(() =>
-                {
-                    this.SendSyncAliveMessage();
-
-                    //queue up one more in case it got missed
-                    Dispatcher.Add(() => this.SendSyncAliveMessage(), TimeSpan.FromSeconds(new Random().Next(0, 100)));
-                }, TimeSpan.FromSeconds(new Random().Next(0, 100)));
+                Dispatcher.Add(() => this.SendSyncAliveMessage(), TimeSpan.FromSeconds(new Random().Next(0, 100)));
+                Dispatcher.Add(() => this.SendSyncAliveMessage(), TimeSpan.FromSeconds(new Random().Next(0, 100)));
 
                 StartAnnouncer();
             }
@@ -72,17 +67,17 @@ namespace Upnp.Ssdp
         {
             lock (this.SyncRoot)
             {
-                // If we're already running then ignore this request
-                if (this.IsRunning)
-                    return;
-
                 // Create a new timeout to send out SSDP alive messages
                 // Also make sure we kick the first one off semi-instantly
                 this.TimeoutToken = Dispatcher.Add(() =>
                 {
                     if (!SendSyncAliveMessage())
+                    {
+                        Trace.WriteLine(string.Format("Stopping Dispatcher for {0}", this.USN), "SSDP");
                         return;
+                    }
 
+                    
                     StartAnnouncer();
                 }, GetNextAdvertWaitTime());
             }
@@ -134,10 +129,10 @@ namespace Upnp.Ssdp
             Trace.WriteLine(string.Format("Sending ALIVE {0}", this.USN), "SSDP");
                 
             // TODO: Do we need to make sure we join these multicast groups?
-            foreach (IPEndPoint ep in this.RemoteEndPoints)
+            foreach (var ep in this.RemoteEndPoints)
             {
-                byte[] bytes = Encoding.ASCII.GetBytes(Protocol.CreateAliveNotify(ep,
-                    this.Location, this.NotificationType, this.USN, this.MaxAge, this.UserAgent));
+                var notify = Protocol.CreateAliveNotify(ep, this.Location, this.NotificationType, this.USN, this.MaxAge, this.UserAgent);
+                var bytes = Encoding.ASCII.GetBytes(notify);
                 this.Server.Send(bytes, bytes.Length, ep);
             }
         }
@@ -151,12 +146,12 @@ namespace Upnp.Ssdp
         /// </summary>
         protected void SendByeByeMessage()
         {
-            // TODO: Do we need to make sure we join these multicast groups?
+            Trace.WriteLine(string.Format("Sending BYEBYE {0}", this.USN), "SSDP");
 
-            foreach (IPEndPoint ep in this.RemoteEndPoints)
+            // TODO: Do we need to make sure we join these multicast groups?
+            foreach (var ep in this.RemoteEndPoints)
             {
-                byte[] bytes = Encoding.ASCII.GetBytes(Protocol.CreateByeByeNotify(Protocol.DiscoveryEndpoints.IPv4,
-                    this.NotificationType, this.USN));
+                var bytes = Encoding.ASCII.GetBytes(Protocol.CreateByeByeNotify(ep, this.NotificationType, this.USN));
                 this.Server.Send(bytes, bytes.Length, ep);
             }
         }
