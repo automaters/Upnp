@@ -12,7 +12,6 @@ namespace Upnp.Upnp
             if(from == null)
                 return;
 
-            //always merge from right into left
             var fromChildren = from.EnumerateDevices().ToArray();
 
             foreach(var toChild in to.EnumerateDevices())
@@ -21,7 +20,7 @@ namespace Upnp.Upnp
                 if (fromChild == null)
                     continue;
 
-                MergeChildDevice(toChild, fromChild);
+                MergeDevice(toChild, fromChild);
 
                 foreach (var toService in toChild.Services)
                 {
@@ -29,16 +28,16 @@ namespace Upnp.Upnp
                     if (fromService == null)
                         continue;
 
-                    MergeChildDeviceServices(toService, fromService);
+                    MergeService(toService, fromService);
                 }
             }
         }
 
-        protected virtual void MergeChildDeviceServices(UpnpService to, UpnpService from)
+        protected virtual void MergeService(UpnpService to, UpnpService from)
         {
         }
 
-        protected virtual void MergeChildDevice(UpnpDevice to, UpnpDevice from)
+        protected virtual void MergeDevice(UpnpDevice to, UpnpDevice from)
         {
         }
 
