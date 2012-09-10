@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using Upnp.Extensions;
 using Upnp.Gena;
 using Upnp.Ssdp;
 
@@ -10,59 +12,57 @@ namespace Upnp.Upnp
     {
         public UpnpRoot Root { get; private set; }
 
-        private readonly SsdpServer _ssdp;
-        private readonly GenaServer _gena;
+        protected readonly SsdpServer SsdpServer;
+        protected readonly GenaServer GenaServer;
         private readonly List<SsdpAnnouncer> _announcers = new List<SsdpAnnouncer>();
         
         public UpnpServer(UpnpRoot root, SsdpServer ssdp = null, GenaServer gena = null)
         {
             this.Root = root;
-            this._ssdp = ssdp ?? new SsdpServer();
-            this._gena = gena ?? new GenaServer();
+            this.SsdpServer = ssdp ?? new SsdpServer();
+            this.GenaServer = gena ?? new GenaServer();
 
-            BuildAdvertisements();
+            _announcers.AddRange(BuildAdvertisements());
         }
 
-        private void CreateAdvertisement(string notificationType, string usn)
+        protected SsdpAnnouncer CreateAdvertisement(string notificationType, string usn)
         {
-            var ad = this._ssdp.CreateAnnouncer();
+            var ad = this.SsdpServer.CreateAnnouncer();
             ad.NotificationType = notificationType;
             ad.USN = usn;
             ad.Location = this.Root.DeviceDescriptionUrl.ToString();
-            _announcers.Add(ad);
+            return ad;
         }
-  
-        private void BuildAdvertisements()
-        {
-            CreateAdvertisement("upnp:rootdevice", string.Format ("{0}::upnp:rootdevice", this.Root.RootDevice.UDN));
 
-            BuildAdvertisementsForDevice(this.Root.RootDevice);
+        protected virtual IEnumerable<SsdpAnnouncer> BuildAdvertisements()
+        {
+            return BuildAdvertisementsForDevice(this.Root.RootDevice)
+                    .Add(() => CreateAdvertisement("upnp:rootdevice", string.Format ("{0}::upnp:rootdevice", this.Root.RootDevice.UDN)));
         }
-  
-        private void BuildAdvertisementsForDevice(UpnpDevice device)
+
+        private IEnumerable<SsdpAnnouncer> BuildAdvertisementsForDevice(UpnpDevice device)
         {
             var notificationType = device.UDN;
-            CreateAdvertisement (notificationType, notificationType);
-
             var type = device.Type.ToString();
-            CreateAdvertisement (type, string.Format ("{0}::{1}", device.UDN, type));
 
-            foreach (var service in device.Services)
-                BuildAdvertisementsForService (service);
+            var serviceAnnouncers = from service in device.Services
+                                    select BuildAdvertisementForService(service);
 
-            foreach (var child in device.Devices)
-                BuildAdvertisementsForDevice(child);
+            var deviceAnnouncers = from child in device.Devices
+                                   from announcer in BuildAdvertisementsForDevice(child)
+                                   select announcer;
+
+            return deviceAnnouncers.Concat(serviceAnnouncers).Add(() => CreateAdvertisement(notificationType, notificationType), () => CreateAdvertisement (type, string.Format ("{0}::{1}", device.UDN, type)));
         }
-  
-        private void BuildAdvertisementsForService(UpnpService service)
+
+        private SsdpAnnouncer BuildAdvertisementForService(UpnpService service)
         {
-            var type = service.Type.ToString ();
-            CreateAdvertisement (type, string.Format ("{0}::{1}", service.Device.UDN, type));
+            return CreateAdvertisement (service.Type.ToString (), string.Format ("{0}::{1}", service.Device.UDN, service.Type));
         }
   
         public void StopListening()
         {
-            this._ssdp.StopListening();
+            this.SsdpServer.StopListening();
 
             foreach (var announcer in _announcers)
                 announcer.Shutdown();
@@ -70,7 +70,7 @@ namespace Upnp.Upnp
 
         public void StartListening(params IPEndPoint[] remoteEps)
         {
-            this._ssdp.StartListening(remoteEps);
+            this.SsdpServer.StartListening(remoteEps);
 
             foreach (var announcer in _announcers)
                 announcer.Start();
@@ -78,7 +78,7 @@ namespace Upnp.Upnp
 
         public void Dispose()
         {
-            this._ssdp.Dispose();
+            this.SsdpServer.Dispose();
         }
     }
 }

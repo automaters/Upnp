@@ -45,6 +45,7 @@
     <Compile Include="Disposable.cs" />
     <Compile Include="EventArgs.cs" />
     <Compile Include="Extensions\Dictionary.cs" />
+    <Compile Include="Extensions\Enumerable.cs" />
     <Compile Include="Extensions\Xml.cs" />
     <Compile Include="Gena\GenaException.cs" />
     <Compile Include="Gena\GenaMessage.cs" />
