@@ -73,6 +73,7 @@
     <Compile Include="Upnp\UpnpAction.cs" />
     <Compile Include="Upnp\UpnpArgument.cs" />
     <Compile Include="Upnp\UpnpDevice.cs" />
+    <Compile Include="Upnp\UpnpDeviceMerger.cs" />
     <Compile Include="Upnp\UpnpIcon.cs" />
     <Compile Include="Upnp\UpnpRoot.cs" />
     <Compile Include="Upnp\UpnpServer.cs" />
