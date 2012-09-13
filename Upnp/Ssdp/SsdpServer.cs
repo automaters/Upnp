@@ -143,6 +143,11 @@ namespace Upnp.Ssdp
             private set;
         }
 
+        public bool IsListening
+        {
+            get { return this.Server.IsListening; }
+        }
+
         #endregion
 
         #region IDisposable Implementation

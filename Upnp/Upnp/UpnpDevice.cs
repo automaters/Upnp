@@ -11,6 +11,9 @@ namespace Upnp.Upnp
 {
     public class UpnpDevice : IXmlSerializable
     {
+        private UpnpDevice _parent;
+        private UpnpRoot _root;
+
         public UpnpDevice()
         {
             this.Properties = new Dictionary<string, string>();
@@ -108,12 +111,68 @@ namespace Upnp.Upnp
   
         #endregion
 
+        #region Events
+
+        public event EventHandler<EventArgs<UpnpDevice>> Removed;
+        public event EventHandler<EventArgs<UpnpDevice>> Added;
+
+        protected void OnAdded()
+        {
+            var handler = Added;
+            if (handler != null) 
+                handler(this, new EventArgs<UpnpDevice>(this));
+        }
+
+        protected void OnRemoved()
+        {
+            var handler = this.Removed;
+            if (handler != null)
+                handler(this, new EventArgs<UpnpDevice>(this));
+        }
+
+        #endregion
+
         #region Properties
 
-        public UpnpRoot Root { get;protected internal set; }
-  
-        public UpnpDevice Parent { get;protected set; }
-  
+        public UpnpRoot Root
+        {
+            get { return _root; }
+            protected internal set
+            {
+                if (_root == value)
+                    return; 
+                
+                if(_root != null)
+                    _root.OnChildDeviceRemoved(this);
+
+                _root = value;
+
+                if(_root != null)
+                    _root.OnChildDeviceAdded(this);
+            }
+        }
+
+        public UpnpDevice Parent
+        {
+            get { return _parent; }
+            protected set
+            {
+                if(_parent == value)
+                    return;
+
+                _parent = value;
+
+                if(_parent == null)
+                {
+                    OnRemoved();
+                }
+                else
+                {
+                    OnAdded();
+                }
+            }
+        }
+
         public UpnpDevice RootDevice
         {
             get

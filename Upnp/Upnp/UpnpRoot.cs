@@ -146,6 +146,25 @@ namespace Upnp.Upnp
 
         #endregion
 
+        public event EventHandler<EventArgs<UpnpDevice>> ChildDeviceAdded;
+
+        public event EventHandler<EventArgs<UpnpDevice>> ChildDeviceRemoved;
+
+        protected internal void OnChildDeviceAdded(UpnpDevice child)
+        {
+            var handler = ChildDeviceAdded;
+            if (handler != null) 
+                handler(this, new EventArgs<UpnpDevice>(child));
+        }
+
+        protected internal void OnChildDeviceRemoved(UpnpDevice child)
+        {
+            var handler = ChildDeviceRemoved;
+            if (handler != null) 
+                handler(this, new EventArgs<UpnpDevice>(child));
+        }
+
+
         public IEnumerable<UpnpDevice> FindByDeviceType(UpnpType type)
         {
             var root = this.RootDevice;

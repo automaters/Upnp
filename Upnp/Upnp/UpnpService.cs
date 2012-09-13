@@ -9,6 +9,7 @@ namespace Upnp.Upnp
 {
     public class UpnpService : IXmlSerializable
     {
+        private UpnpDevice _device;
 
         #region Object Overrides
 
@@ -56,6 +57,26 @@ namespace Upnp.Upnp
 
         #endregion
 
+        #region Events
+
+        public event EventHandler<EventArgs<UpnpService>> Removed;
+        public event EventHandler<EventArgs<UpnpService>> Added;
+
+        protected void OnAdded()
+        {
+            var handler = Added;
+            if (handler != null)
+                handler(this, new EventArgs<UpnpService>(this));
+        }
+
+        protected void OnRemoved()
+        {
+            var handler = this.Removed;
+            if (handler != null)
+                handler(this, new EventArgs<UpnpService>(this));
+        }
+        #endregion
+
         #region Properties
 
         public UpnpRoot Root
@@ -65,8 +86,23 @@ namespace Upnp.Upnp
 
         public UpnpDevice Device
         {
-            get;
-            protected internal set;
+            get { return _device; }
+            protected internal set
+            {
+                if(_device == value)
+                    return;
+
+                _device = value;
+
+                if(_device == null)
+                {
+                    OnRemoved();
+                }
+                else
+                {
+                    OnAdded();
+                }
+            }
         }
 
         public UpnpType Type

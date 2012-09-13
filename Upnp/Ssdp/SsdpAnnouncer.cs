@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -126,15 +127,12 @@ namespace Upnp.Ssdp
         /// </summary>
         public void SendAliveMessage()
         {
-            Trace.WriteLine(string.Format("Sending ALIVE {0}", this.USN), "SSDP");
-                
-            // TODO: Do we need to make sure we join these multicast groups?
-            foreach (var ep in this.RemoteEndPoints)
+            Parallel.ForEach(this.RemoteEndPoints.ToArray(), ep =>
             {
                 var notify = Protocol.CreateAliveNotify(ep, this.Location, this.NotificationType, this.USN, this.MaxAge, this.UserAgent);
                 var bytes = Encoding.ASCII.GetBytes(notify);
                 this.Server.Send(bytes, bytes.Length, ep);
-            }
+            });
         }
 
         #endregion
@@ -146,18 +144,15 @@ namespace Upnp.Ssdp
         /// </summary>
         protected void SendByeByeMessage()
         {
-            Trace.WriteLine(string.Format("Sending BYEBYE {0}", this.USN), "SSDP");
-
-            // TODO: Do we need to make sure we join these multicast groups?
-            foreach (var ep in this.RemoteEndPoints)
+            Parallel.ForEach(this.RemoteEndPoints.ToArray(), ep =>
             {
                 var bytes = Encoding.ASCII.GetBytes(Protocol.CreateByeByeNotify(ep, this.NotificationType, this.USN));
                 this.Server.Send(bytes, bytes.Length, ep);
-            }
+            });
         }
         
         #endregion
-
+        
         #region Properties
 
         protected readonly object SyncRoot = new object();
