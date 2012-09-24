@@ -1,10 +1,53 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Serialization;
 
 namespace Upnp.Xml
 {
+    public class XmlStateMachine : IEnumerable
+    {
+        readonly Dictionary<string, Action> _actions = new Dictionary<string, Action>();
+        readonly Dictionary<string, XmlStateMachine> _machines = new Dictionary<string, XmlStateMachine>();
+
+        public void Add(string key, Action value)
+        {
+            _actions.Add(key, value);
+        }
+
+        public void Add(Action value)
+        {
+            _actions.Add(XmlHelper.DefaultParseElementName, value);
+        }
+
+        public void Add(string key, XmlStateMachine value)
+        {
+            _machines.Add(key, value);
+        }
+
+        public void Add(XmlStateMachine value)
+        {
+            _machines.Add(XmlHelper.DefaultParseElementName, value);
+        }
+
+        public void Add(XmlReader reader, string endElement = null)
+        {
+            foreach (var pair in _machines)
+            {
+                var pair1 = pair;
+                _actions[pair.Key] = () => pair1.Value.Add(reader);
+            }
+
+            XmlHelper.ParseXml(reader, _actions, endElement);
+        }
+
+        public IEnumerator GetEnumerator()
+        {
+            throw new NotSupportedException();    
+        }
+    }
+
     public static class XmlHelper
     {
 
@@ -55,7 +98,7 @@ namespace Upnp.Xml
         public static void ParseXmlCollection<T>(XmlReader reader, ICollection<T> collection, string elementName, Func<T> creator)
             where T : IXmlSerializable
         {
-            Dictionary<string, Action> dict = new Dictionary<string, Action>()
+            var dict = new Dictionary<string, Action>()
             {
                 {elementName, () =>
                     {
@@ -69,5 +112,21 @@ namespace Upnp.Xml
             ParseXml(reader, dict);
         }
 
+       public static void ParseXmlCollection<T>(XmlReader reader, ICollection<T> collection, string elementName = DefaultParseElementName)
+           where T : IXmlSerializable, new()
+       {
+           var dict = new Dictionary<string, Action>()
+            {
+                {elementName, () =>
+                    {
+                        T value = new T();
+                        collection.Add(value);
+                        value.ReadXml(reader);
+                    }
+                }
+            };
+
+           ParseXml(reader, dict);
+       }
     }
 }

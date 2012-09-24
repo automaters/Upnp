@@ -42,13 +42,10 @@ namespace Upnp.Upnp
 
             var dict = new Dictionary<string, Action>()
             {
-                {"specVersion", () => 
-                    {
-                        XmlHelper.ParseXml(reader, new Dictionary<string, Action> {
-                            {"major", () => this.UpnpMajorVersion = reader.ReadElementContentAsInt()},
-                            {"minor", () => this.UpnpMinorVersion = reader.ReadElementContentAsInt()}
-                        });
-                    }
+                {"specVersion", () => XmlHelper.ParseXml(reader, new Dictionary<string, Action> {
+                    {"major", () => this.UpnpMajorVersion = reader.ReadElementContentAsInt()},
+                    {"minor", () => this.UpnpMinorVersion = reader.ReadElementContentAsInt()}
+                })
                 },
                 {"URLBase", () => this.UrlBase = new Uri(reader.ReadString())},
                 {"device", () => {
@@ -188,6 +185,19 @@ namespace Upnp.Upnp
         public IEnumerable<UpnpService> EnumerateServices()
         {
             return this.EnumerateDevices().SelectMany(d => d.Services);
+        }
+
+        public static UpnpRoot LoadFromDeviceDescriptionUrl(string url)
+        {
+            var root = new UpnpRoot();
+            using (var reader = new XmlTextReader(url))
+            {
+                root.ReadXml(reader);
+            }
+
+            root.DeviceDescriptionUrl = new Uri(url);
+
+            return root;
         }
     }
 }

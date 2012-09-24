@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -99,8 +100,9 @@ namespace Upnp.Gena
 
                         return;
                     }
-                    catch (WebException)
+                    catch (WebException exception)
                     {
+                        Trace.WriteLine(exception);
                     }
                 }
             });
