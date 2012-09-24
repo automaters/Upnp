@@ -49,8 +49,7 @@ namespace Upnp.Gena
                 if(sid == null)
                     return null;
                 
-                return sid.Substring("uuid:".Length);
-                
+                return sid;                
             }
             set
             {
